@@ -24,10 +24,18 @@ func (c *criService) GetContainerEvents(r *runtime.GetEventsRequest, s runtime.R
 	// TODO (https://github.com/containerd/containerd/issues/7318):
 	// replace with a real implementation that broadcasts containerEventsChan
 	// to all subscribers.
-	for event := range c.containerEventsChan {
-		if err := s.Send(&event); err != nil {
-			return err
+	ctx := s.Context()
+
+	for {
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+
+		case event := <-c.containerEventsChan:
+			if err := s.Send(&event); err != nil {
+				// c.containerEventsChan <- event
+				return err
+			}
 		}
 	}
-	return nil
 }
