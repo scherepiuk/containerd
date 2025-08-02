@@ -29,7 +29,7 @@ func (c *criService) GetContainerEvents(r *runtime.GetEventsRequest, s runtime.R
 	for {
 		select {
 		case <-ctx.Done():
-			return ctx.Err()
+			return nil
 
 		case event := <-c.containerEventsChan:
 			if err := s.Send(&event); err != nil {
